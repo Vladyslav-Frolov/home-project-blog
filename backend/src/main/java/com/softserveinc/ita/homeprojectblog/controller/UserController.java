@@ -70,7 +70,7 @@ public class UserController implements UsersApi {
         var commentDtoPage = commentService.getCommentsByCurrentUser(id, sort, pageNum, pageSize);
         var commentPage = commentMapper.toCommentPage(commentDtoPage);
 
-        MultiValueMap<String, String> headers = boilerplate.getXTotalCount(commentPage);
+        var headers = boilerplate.getXTotalCount(commentPage);
 
         return new ResponseEntity<>(commentPage.getContent(), headers, HttpStatus.OK);
     }
@@ -96,7 +96,7 @@ public class UserController implements UsersApi {
 
         var postPage = postMapper.toPostPage(postDtoPage);
 
-        MultiValueMap<String, String> headers = boilerplate.getXTotalCount(postPage);
+        var headers = boilerplate.getXTotalCount(postPage);
 
         return new ResponseEntity<>(postPage.getContent(), headers, HttpStatus.OK);
     }
@@ -116,14 +116,17 @@ public class UserController implements UsersApi {
 
         var userPage = userMapper.toUserPage(userDtoPage);
 
-        MultiValueMap<String, String> headers = boilerplate.getXTotalCount(userPage);
+        var headers = boilerplate.getXTotalCount(userPage);
 
         return new ResponseEntity<>(userPage.getContent(), headers, HttpStatus.OK);
     }
 
+    // TODO
     @Override
     public ResponseEntity<Void> removeCommentByCurrentUser(BigDecimal id) {
-        return null;
+        System.out.println("id --> " + id);
+        commentService.removeCommentByCurrentUser(id);
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @Override

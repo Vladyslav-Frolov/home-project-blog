@@ -7,15 +7,11 @@ import com.softserveinc.ita.homeprojectblog.mapper.UserMapperService;
 import com.softserveinc.ita.homeprojectblog.repository.RoleRepository;
 import com.softserveinc.ita.homeprojectblog.repository.UserRepository;
 import com.softserveinc.ita.homeprojectblog.service.UserService;
-import com.softserveinc.ita.homeprojectblog.util.Checkout;
-import com.softserveinc.ita.homeprojectblog.util.page.Sorter;
-import com.softserveinc.ita.homeprojectblog.util.query.EntitySpecificationService;
+import com.softserveinc.ita.homeprojectblog.util.Boilerplate;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -36,7 +32,7 @@ import static com.softserveinc.ita.homeprojectblog.util.Constants.USER_NOT_FOUND
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    UserRepository userRepository;
+    UserRepository<UserEntity, BigDecimal> userRepository;
 
     RoleRepository roleRepository;
 
@@ -44,12 +40,9 @@ public class UserServiceImpl implements UserService {
 
     PasswordEncoder passwordEncoder;
 
-    Sorter sorter;
+    Boilerplate boilerplate;
 
-    Checkout checkout;
 
-    @Qualifier("entitySpecificationService")
-    EntitySpecificationService<UserEntity> entitySpecificationService;
 
     @Override
     public Page<UserDto> getUsers(BigDecimal id, String name, String sort, Integer pageNum, Integer pageSize) {
@@ -57,16 +50,21 @@ public class UserServiceImpl implements UserService {
         predicateMap.put("id", id != null ? id.toString() : null);
         predicateMap.put("name", name);
 
+        var pageEntities = boilerplate.getUserEntities(userRepository, sort, pageNum, pageSize, predicateMap);
+
+        return userMapperService.toUserDtoPage(pageEntities);
+    }
+
+/*    private Page<UserEntity> getEntities(String sort, Integer pageNum, Integer pageSize, Map<String, String> predicateMap) {
         var check = checkout.checkoutAndSetDefaults(sort, pageNum, pageSize);
 
         var specification = entitySpecificationService.getSpecification(predicateMap);
         var pageRequest = PageRequest.of(check.getPageNum(), check.getPageSize(),
                 sorter.getSorter(check.getSort()));
 
-        var pageEntities = userRepository.findAll(specification, pageRequest);
+        return userRepository.findAll(specification, pageRequest);
+    }*/
 
-        return userMapperService.toUserDtoPage(pageEntities);
-    }
 
     @Override
     public UserDto getUser(BigDecimal id) {

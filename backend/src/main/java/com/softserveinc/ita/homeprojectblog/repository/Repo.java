@@ -1,15 +1,11 @@
 package com.softserveinc.ita.homeprojectblog.repository;
 
 import com.softserveinc.ita.homeprojectblog.entity.UserEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
-import java.util.Optional;
-
-@Repository
-public interface UserRepository<E, I> extends Repo<E, I> {
-
-    Optional<E> findByName(String name);
+public interface Repo<E, I> extends JpaRepository<E, I>, JpaSpecificationExecutor<E> {
 }

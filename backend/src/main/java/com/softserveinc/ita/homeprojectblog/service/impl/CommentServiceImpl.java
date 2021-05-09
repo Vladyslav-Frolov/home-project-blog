@@ -39,7 +39,7 @@ public class CommentServiceImpl implements CommentService {
     UserServiceImpl userService;
     PostServiceImpl postService;
 
-    CommentRepository commentRepository;
+    CommentRepository<CommentEntity, BigDecimal> commentRepository;
 
     @Qualifier("entitySpecificationService")
     EntitySpecificationService<CommentEntity> entitySpecificationService;
@@ -125,14 +125,26 @@ public class CommentServiceImpl implements CommentService {
         predicateMap.put("id", id != null ? id.toString() : null);
         predicateMap.put("user.id", userDto.getId() != null ? userDto.getId().toString() : null);
 
+        Page<CommentEntity> commentEntitiesPage = getEntities(sort, pageNum, pageSize, predicateMap);
+
+        return commentMapper.toCommentDtoPage(commentEntitiesPage);
+    }
+
+    private Page<CommentEntity> getEntities(String sort, Integer pageNum, Integer pageSize, Map<String, String> predicateMap) {
         var check = checkout.checkoutAndSetDefaults(sort, pageNum, pageSize);
 
         var specification = entitySpecificationService.getSpecification(predicateMap);
         var pageRequest = PageRequest.of(check.getPageNum(), check.getPageSize(),
                 sorter.getSorter(check.getSort()));
 
-        var commentEntitiesPage = commentRepository.findAll(specification, pageRequest);
+        return commentRepository.findAll(specification, pageRequest);
+    }
 
-        return commentMapper.toCommentDtoPage(commentEntitiesPage);
+    @Override
+    public void removeCommentByCurrentUser(BigDecimal id) {
+        var userDto = userService.getCurrentUser();
+        var commentEntity = commentRepository.findByUserIdAndId(userDto.getId(), id).orElseThrow(
+                () -> new EntityNotFoundException(String.format(COMMENT_FOR_USER_NOT_FOUND_FORMAT, userDto.getId(), id)));
+        commentRepository.deleteById(commentEntity.getId());
     }
 }
